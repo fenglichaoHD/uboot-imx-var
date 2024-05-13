@@ -1,0 +1,16 @@
+if TARGET_IMX8MP_DEBIX
+
+config SYS_BOARD
+	default "imx8mp_debix"
+
+config SYS_VENDOR
+	default "debix"
+
+config SYS_CONFIG_NAME
+	default "imx8mp_debix"
+
+config IMX_CONFIG
+	default "board/debix/imx8mp_debix/imximage-8mp-sd.cfg"
+
+
+endif

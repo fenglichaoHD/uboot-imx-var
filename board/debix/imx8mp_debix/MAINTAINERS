@@ -1,0 +1,6 @@
+i.MX8MP DEBIXA BOARD
+M:	Tal Pilo <tal.pilo@solid-run.com>
+S:	Maintained
+F:	board/debix/imx8mp_debix/
+F:	include/configs/imx8mp_debix.h
+F:	configs/imx8mp_debix_defconfig
