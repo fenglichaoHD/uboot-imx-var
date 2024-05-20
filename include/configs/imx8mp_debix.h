@@ -27,9 +27,9 @@
 
 #ifdef CONFIG_DISTRO_DEFAULTS
 #define BOOT_TARGET_DEVICES(func) \
-		func(USB, usb, 0) \
 		func(MMC, mmc, 1) \
-		func(MMC, mmc, 2)
+		func(MMC, mmc, 2) \
+		func(USB, usb, 0) 
 
 #include <config_distro_bootcmd.h>
 /* redefine BOOTENV_EFI_SET_FDTFILE_FALLBACK to use Variscite function to load fdt */
@@ -74,17 +74,20 @@
 	"mmcpart=1\0" \
 	"mmcautodetect=yes\0" \
 	"m7_addr=0x7e0000\0" \
+	"loadaddr=0x48000000\0" \
+	"filesize=0x20000\0" \
 	"m7_bin=hello_world.bin\0" \
 	"use_m7=no\0" \
 	"dfu_alt_info=mmc 2=1 raw 0x40 0x1000 mmcpart\0" \
 	"loadm7bin=" \
-				"load mmc ${mmcdev}:${mmcpart} ${loadaddr} ${bootdir}/${m7_bin} && " \
+				"load mmc ${mmcdev}:${mmcpart} ${loadaddr} /${m7_bin} && " \
 				"cp.b ${loadaddr} ${m7_addr} ${filesize}; " \
 				"echo Init rsc_table region memory; " \
 				"mw.b 400ff000 0 10\0" \
 	"runm7bin=" \
 		"if test ${m7_addr} = 0x7e0000; then " \
 			"echo Booting M7 from TCM; " \
+			"dcache flush; " \
 		"else " \
 			"echo Booting M7 from DRAM; " \
 			"dcache flush; " \
@@ -103,18 +106,10 @@
 	"loadimage=load mmc ${mmcdev}:${mmcpart} ${img_addr} ${bootdir}/${image};" \
 		"unzip ${img_addr} ${loadaddr}\0" \
 	"findfdt=" \
-		"if test $fdt_file = undefined; then " \
-			"if test $board_name = VAR-SOM-MX8M-PLUS; then " \
-				"if test ${som_rev} -lt 2; then " \
-					"setenv fdt_file imx8mp-var-som-1.x-symphony.dtb; " \
-				"elif test ${som_has_wbe} = 1; then " \
-					"setenv fdt_file imx8mp-var-som-wbe-symphony.dtb; " \
-				"else " \
-					"setenv fdt_file imx8mp-var-som-symphony.dtb; " \
-				"fi; " \
-			"else " \
-				"setenv fdt_file imx8mp-var-dart-dt8mcustomboard.dtb;" \
-			"fi; " \
+		"if test ${use_m7} = yes; then " \
+			"setenv fdt_file imx8mp-debix-model-a-m7.dtb; " \
+		"else " \
+			"setenv fdt_file imx8mp-debix-model-a.dtb;" \
 		"fi; \0" \
 	"loadfdt=run findfdt; " \
 		"echo fdt_file=${fdt_file}; " \
@@ -164,27 +159,12 @@
 				"echo WARN: Cannot load the DT; " \
 			"fi; " \
 		"fi;\0" \
-	"bsp_bootcmd=echo Running BSP bootcmd ...; " \
+	"bsp_bootmcu=echo Running bsp bootmcu ...; " \
 		"run ramsize_check; " \
 		"mmc dev ${mmcdev}; " \
-		"if mmc rescan; then " \
-			"if test ${use_m7} = yes && run loadm7bin; then " \
-				"run runm7bin; " \
-			"fi; " \
-			"if run loadbootscript; then " \
-				"run bootscript; " \
-			"else " \
-				"if run loadbootenv; then " \
-					"echo Loaded environment from ${bootenv}; " \
-					"run importbootenv; " \
-				"fi;" \
-				"if run loadimage; then " \
-					"run mmcboot; " \
-				"else " \
-					"run netboot; " \
-				"fi; " \
-			"fi; " \
-		"fi;"
+		"if test ${use_m7} = yes && run loadm7bin; then " \
+			"run runm7bin; " \
+		"fi; " \
 /* Link Definitions */
 
 #define CFG_SYS_INIT_RAM_ADDR		0x40000000

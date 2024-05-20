@@ -390,7 +390,7 @@ int board_late_init(void)
 	board_late_mmc_env_init();
 #endif
 
-	env_set("fdtfile", "imx8mp-debix-model-a.dtb");
+	env_set("fdtfile", "imx8mp-debix-model-a-m7.dtb");
 #ifdef CONFIG_ENV_VARS_UBOOT_RUNTIME_CONFIG
 	// expose identity to environment
 	if(board_id.carrier_name[0])
